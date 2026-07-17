@@ -1,0 +1,2 @@
+carlos;123456-12/SP;dermatologista
+geugres;567890-88/PI;NUTROLOGO
