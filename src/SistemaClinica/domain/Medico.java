@@ -1,5 +1,7 @@
 package SistemaClinica.domain;
 
+import java.util.Objects;
+
 public class Medico {
     private String nome;
     private String crm;
@@ -27,6 +29,18 @@ public class Medico {
 
     public String getEspecialidade() {
         return especialidade;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Medico medico = (Medico) o;
+        return Objects.equals(crm, medico.crm);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(crm);
     }
 
     @Override

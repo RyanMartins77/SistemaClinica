@@ -3,6 +3,8 @@ package SistemaClinica.service;
 import SistemaClinica.domain.Consulta;
 import SistemaClinica.domain.Medico;
 import SistemaClinica.domain.Paciente;
+import SistemaClinica.exception.ChaveJaExistenteException;
+import SistemaClinica.repository.Repository;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -11,34 +13,34 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Clinica {
-    private ArrayList<Paciente> pacientes;
-    private ArrayList<Medico> medicos;
-    private ArrayList<Consulta> consultas;
+    private Repository<String, Paciente> pacientes;
+    private Repository<String, Medico> medicos;
+    private List<Consulta> consultas;
 
     public Clinica() {
-        this.pacientes = new ArrayList<>();
-        this.medicos = new ArrayList<>();
+        this.pacientes = new Repository<>();
+        this.medicos = new Repository<>();
         this.consultas = new ArrayList<>();
     }
-    public void CadastrarPaciente(Paciente p){
-        if (buscarPaciente(p.getCpf()) != null){
-            System.out.println("Esse paciente ja foi cadastrado");
-            return;
+    public void cadastrarPaciente(Paciente p){
+        try{
+            pacientes.adicionar(p.getCpf(), p);
+            ListaPaciente();
+        }catch (ChaveJaExistenteException e){
+            System.out.println(e.getMessage());
         }
-        pacientes.add(p);
-        ListaPaciente();
-        System.out.println(" O paciente " + p.getNome() + " foi cadastrado com sucesso.");
     }
     public void cadastrarMedico(Medico m){
-        if (buscarMedico(m.getCrm()) !=null){
-            System.out.println("Esse medico ja foi cadastrado");
-            return;
+        try{
+            medicos.adicionar(m.getCrm(),m);
+        }catch (ChaveJaExistenteException e ) {
+            System.out.println(e.getMessage());
         }
-        medicos.add(m);
-        listaMedicos();
-        System.out.println("O medico " + m.getNome() + " foi cadastrado com sucesso");
     }
     public void agendarConsulta(String cpf , String crm, LocalDateTime horario){
         Paciente p1 = buscarPaciente(cpf);
@@ -96,6 +98,12 @@ public class Clinica {
             System.out.println("consultas nao encontradas");
         }
     }
+    public Paciente buscarPaciente(String cpf ){
+        return pacientes.buscar(cpf);
+    }
+    public Medico buscarMedico(String crm){
+        return medicos.buscar(crm);
+    }
     public boolean ConflitoConsulta(String crm, LocalDateTime horario){
         for (Consulta consulta: consultas){
             if (consulta.getMedico().getCrm().equalsIgnoreCase(crm) &&  consulta.getDia_horario().equals(horario)){
@@ -131,21 +139,7 @@ public class Clinica {
 
         return false;
     }
-    public Medico buscarMedico(String crm){
-        for (Medico m1 : medicos){
-            if (m1.getCrm().equals(crm)){
-                return m1;
-            }
-        }
-        return null;
-    }
-    public Paciente buscarPaciente(String cpf){
-        for (Paciente p1 : pacientes){
-            if (p1.getCpf().equals(cpf))
-                return p1;
-        }
-        return null;
-    }
+
     public void ConsultarAgendaMedico(String crm){
         for(Consulta c1 : consultas){
             if (c1.getMedico().getCrm().equalsIgnoreCase(crm)){
@@ -171,8 +165,8 @@ public class Clinica {
     public void ListaPaciente(){
         try (FileWriter pacientes_s = new FileWriter("ListaPacientes.txt"); BufferedWriter
         pacientes1 = new BufferedWriter(pacientes_s)){
-            for (Paciente p1 : pacientes){
-                pacientes1.write( p1.getNome() + ";" + p1.getCpf() +";" + p1.getIdade() + ";" + p1.getTelefone());
+            for (Paciente paciente: pacientes.valores()){
+                pacientes1.write( paciente.getNome() + ";" + paciente.getCpf() +";" + paciente.getIdade() + ";" + paciente.getTelefone());
                 pacientes1.newLine();
             }
         }catch (IOException e){
@@ -181,7 +175,7 @@ public class Clinica {
     }
     public void listaMedicos(){
         try (FileWriter medicos_s = new FileWriter("ListaMedicos.txt"); BufferedWriter bw = new BufferedWriter(medicos_s)){
-            for (Medico m1 : medicos){
+            for (Medico m1 : medicos.valores()){
                 bw.write( m1.getNome() + ";" + m1.getCrm() + ";" + m1.getEspecialidade());
                 bw.newLine();
             }

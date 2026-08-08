@@ -44,7 +44,7 @@ public class ClinicalTeste {
                         String telefone = sc.nextLine();
 
                         Paciente paciente = new Paciente(nomePaciente, cpfPaciente, idade, telefone);
-                        clinica.CadastrarPaciente(paciente);
+                        clinica.cadastrarPaciente(paciente);
                         break;
 
                     case 2:
@@ -144,17 +144,6 @@ public class ClinicalTeste {
                 System.out.println("Erro: " + e.getMessage());
             }
         }
-    }
-
-    public static void MENU(){
-        System.out.println("===============MENU CLINICA==================");
-        System.out.println("1- Cadastrar Paciente ");
-        System.out.println("2- Cadastrar Medico");
-        System.out.println("3- Agenda Consulta");
-        System.out.println("4- Cancelar Consulta ");
-        System.out.println("5- Verificar agenda medico");
-        System.out.println("6- Verificar agenda de pacientes");
-        System.out.println();
     }
 
 }
