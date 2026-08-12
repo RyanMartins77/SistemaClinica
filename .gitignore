@@ -29,6 +29,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-ListaConsultas.txt/
-ListaMedicos.txt/
-ListaPacientes.txt/
+src/SistemaClinica/repository/ListaConsultas.txt
+src/SistemaClinica/repository/ListaMedicos.txt
+src/SistemaClinica/repository/ListaPacientes.txt
