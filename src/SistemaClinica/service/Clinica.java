@@ -12,10 +12,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Clinica {
     private Repository<String, Paciente> pacientes;
@@ -43,31 +40,21 @@ public class Clinica {
         }
     }
     public void agendarConsulta(String cpf , String crm, LocalDateTime horario){
-        Paciente p1 = buscarPaciente(cpf);
-        Medico m2 = buscarMedico(crm);
+        try {
+         Paciente p1 = buscarPaciente(cpf).orElseThrow(() -> new IllegalArgumentException("Paciente nao existe"));
+         Medico m2 = buscarMedico(crm).orElseThrow(() -> new IllegalArgumentException("Medico nao existe"));
 
-        if (p1 == null){
-            System.out.println("paciente nao existe");
-            return;
-        }
-        if (m2 == null){
-            System.out.println("medico nao encontrado");
-            return;
-        }
-        if (horario.toLocalTime().isBefore(LocalTime.of(8,00)) ||
+         if (horario.toLocalTime().isBefore(LocalTime.of(8,00)) ||
                 horario.toLocalTime().isAfter(LocalTime.of(18,30))){
-            System.out.println("A clinica nao esta em funcionamento.");
-            return;
+            throw new IllegalArgumentException("Clinica nao esta em horario de atendimento");
         }
-        if (TempoConsulta(crm,  horario)){
-            System.out.println("O medico esta em atendimento esse horario... ");
-            return;
+         if (TempoConsulta(crm,  horario)){
+            throw new IllegalArgumentException("O medico ja esta em consulta nesse horario");
         }
-        if (agendarConflitoPaciente(cpf,horario)){
-            System.out.println("Paciente já tem consulta nesse horário.");
-            return;
+         if (agendarConflitoPaciente(cpf,horario)){
+            throw new IllegalArgumentException("O paciente ja esta em consulta nesse horario.");
         }
-       try {
+
            Consulta c1 = new Consulta(p1,m2, horario);
            consultas.add(c1);
            listaConsultas();
@@ -98,10 +85,10 @@ public class Clinica {
             System.out.println("consultas nao encontradas");
         }
     }
-    public Paciente buscarPaciente(String cpf ){
+    public Optional<Paciente> buscarPaciente(String cpf ){
         return pacientes.buscar(cpf);
     }
-    public Medico buscarMedico(String crm){
+    public Optional<Medico> buscarMedico(String crm){
         return medicos.buscar(crm);
     }
     public boolean ConflitoConsulta(String crm, LocalDateTime horario){

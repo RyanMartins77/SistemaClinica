@@ -3,10 +3,7 @@ package SistemaClinica.repository;
 import SistemaClinica.exception.ChaveInexistente;
 import SistemaClinica.exception.ChaveJaExistenteException;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Repository<K,V> {
     private Map<K,V> listas = new HashMap<>();
@@ -24,9 +21,8 @@ public class Repository<K,V> {
         }
     }
 
-    public V buscar(K value){
-       V valor = listas.get(value);
-       return valor;
+    public Optional<V> buscar(K value){
+       return Optional.ofNullable(listas.get(value));
     }
     public Collection<V> valores(){
         return  listas.values();
