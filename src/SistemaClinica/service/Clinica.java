@@ -92,12 +92,7 @@ public class Clinica {
         return medicos.buscar(crm);
     }
     public boolean ConflitoConsulta(String crm, LocalDateTime horario){
-        for (Consulta consulta: consultas){
-            if (consulta.getMedico().getCrm().equalsIgnoreCase(crm) &&  consulta.getDia_horario().equals(horario)){
-                return true;
-            }
-        }
-        return false;
+         return consultas.stream().anyMatch(c -> c.getDia_horario().equals(horario) && c.getMedico().equals(crm));
     }
     public boolean agendarConflitoPaciente(String cpf, LocalDateTime horario){
         for (Consulta c : consultas ){
