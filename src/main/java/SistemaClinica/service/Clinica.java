@@ -5,15 +5,20 @@ import SistemaClinica.domain.Medico;
 import SistemaClinica.domain.Paciente;
 import SistemaClinica.exception.ChaveJaExistenteException;
 import SistemaClinica.repository.Repository;
+import SistemaClinica.repository.RepositoryMedico;
+import SistemaClinica.repository.RepositoryPaciente;
+import lombok.extern.log4j.Log4j2;
+
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
+@Log4j2
 public class Clinica {
     private Repository<String, Paciente> pacientes;
     private Repository<String, Medico> medicos;
@@ -24,19 +29,30 @@ public class Clinica {
         this.medicos = new Repository<>();
         this.consultas = new ArrayList<>();
     }
-    public void cadastrarPaciente(Paciente p){
-        try{
-            pacientes.adicionar(p.getCpf(), p);
-            ListaPaciente();
-        }catch (ChaveJaExistenteException e){
-            System.out.println(e.getMessage());
+    public void cadastrarPaciente(Paciente p) {
+        try {
+            RepositoryPaciente.Adicionar(
+                    p.getNome(),
+                    p.getCpf(),
+                    p.getTelefone());
+            pacientes.adicionar(p.getCpf(),p);
+           log.info("Paciente cadastrado com sucesso!");
+        } catch (SQLException e) {
+            log.error("Erro ao cadastar usuario no Banco. ");
+        }catch (ChaveJaExistenteException e ){
+            log.info("Paciente ja existente");
         }
     }
+
     public void cadastrarMedico(Medico m){
         try{
+            RepositoryMedico.Adicionar(m.getCrm(),m.getNome(),m.getEspecialidade());
             medicos.adicionar(m.getCrm(),m);
-        }catch (ChaveJaExistenteException e ) {
-            System.out.println(e.getMessage());
+           log.info("Medico cadastrado com sucesso");
+        }catch (SQLException e){
+            log.info("erro ao cadastrar medico ao banco");
+        } catch (ChaveJaExistenteException e ) {
+           log.info(e.getMessage());
         }
     }
     public void agendarConsulta(String cpf , String crm, LocalDateTime horario){
@@ -51,16 +67,16 @@ public class Clinica {
          if (TempoConsulta(crm,  horario)){
             throw new IllegalArgumentException("O medico ja esta em consulta nesse horario");
         }
-         if (agendarConflitoPaciente(cpf,horario)){
+         if (conflitoPaciente(cpf,horario)){
             throw new IllegalArgumentException("O paciente ja esta em consulta nesse horario.");
         }
 
            Consulta c1 = new Consulta(p1,m2, horario);
            consultas.add(c1);
            listaConsultas();
-           System.out.println("consulta agendada com sucesso");
+          log.info("consulta agendada com sucesso");
        }catch (IllegalArgumentException e){
-           System.out.println(e.getMessage());
+          log.info(e.getMessage());
        }
 
     }
@@ -73,28 +89,21 @@ public class Clinica {
            }
         }
     }
-    public void ListaConsulta(String cpf){
-        boolean encontrado = false;
-        for (Consulta c1 : consultas){
-            if (c1.getPaciente().getCpf().equals(cpf)){
-                System.out.println(c1);
-                encontrado = true;
-            }
-        }
-        if (!encontrado){
-            System.out.println("consultas nao encontradas");
-        }
+    public void listarConsulta(String cpf){
+         consultas.stream().filter(c -> c.getPaciente().getCpf().equals(cpf)).forEach(c ->log.info(c));
     }
+
+
     public Optional<Paciente> buscarPaciente(String cpf ){
         return pacientes.buscar(cpf);
     }
     public Optional<Medico> buscarMedico(String crm){
         return medicos.buscar(crm);
     }
-    public boolean ConflitoConsulta(String crm, LocalDateTime horario){
+    public boolean conflitoConsulta(String crm, LocalDateTime horario){
          return consultas.stream().anyMatch(c -> c.getDia_horario().equals(horario) && c.getMedico().equals(crm));
     }
-    public boolean agendarConflitoPaciente(String cpf, LocalDateTime horario){
+    public boolean conflitoPaciente(String cpf, LocalDateTime horario){
         return consultas.stream().anyMatch(c-> c.getPaciente().getCpf().equals(cpf) && c.getDia_horario().equals(horario));
     }
     public boolean TempoConsulta(String crm, LocalDateTime horarioNovo) {
@@ -118,24 +127,24 @@ public class Clinica {
     }
 
     public void ConsultarAgendaMedico(String crm){
-        for(Consulta c1 : consultas){
-            if (c1.getMedico().getCrm().equalsIgnoreCase(crm)){
-                System.out.println("nome: " + c1.getMedico().getNome() + "\n" + "horarios: " + c1.getDia_horario().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))+ "\npacientes:"   + c1.getPaciente().getNome());
-            }
-        }
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        consultas.stream().filter(c-> c.getMedico().getCrm().equalsIgnoreCase(crm)).forEach(c ->log.info( "nome: " + c.getMedico().getNome()
+                + "\nhorarios: " + c.getDia_horario().format(formatter)
+                + "\npacientes: " + c.getPaciente().getNome()));
     }
     public void verificarAgendaPacientes(String cpf){
         boolean encontrado = false;
         for (Consulta c2 : consultas){
             if (c2.getPaciente().getCpf().equalsIgnoreCase(cpf)){
                 if (!encontrado){
-                    System.out.println("consultas do paciente: ");
+                   log.info("consultas do paciente: ");
                 }
-                System.out.println(c2.getDia_horario().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "-" + c2.getMedico().getNome());
+               log.info(c2.getDia_horario().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "-" + c2.getMedico().getNome());
                 encontrado = true;
             }
             if (!encontrado){
-                System.out.println("nenhum paciente agendado com esse cpf");
+               log.info("nenhum paciente agendado com esse cpf");
             }
         }
     }

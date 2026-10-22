@@ -1,8 +1,10 @@
 package SistemaClinica.teste;
 
+
 import SistemaClinica.service.Clinica;
 import SistemaClinica.domain.Medico;
 import SistemaClinica.domain.Paciente;
+import SistemaClinica.service.ServiceConsulta;
 
 import java.time.LocalDateTime;
 import java.util.InputMismatchException;
@@ -127,7 +129,6 @@ public class ClinicalTeste {
 
                         clinica.verificarAgendaPacientes(cpfAgenda);
                         break;
-
                     case 0:
                         System.out.println("Encerrando sistema...");
                         break;

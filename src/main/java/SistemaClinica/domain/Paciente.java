@@ -9,7 +9,7 @@ public class Paciente {
     public Paciente(String nome, String cpf, int idade, String telefone) {
         if (!cpf.matches("^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2})$"))
             throw new IllegalArgumentException("cpf invalido");
-        if (!nome.matches("^[A-Za-z]+$")){
+        if (!nome.matches("^[A-Za-z]+( [A-Za-z]+)*$")){
             throw new IllegalArgumentException("Nome invalido.");
         }
         this.nome = nome;
