@@ -15,6 +15,8 @@ Este projeto foi criado para consolidar os conhecimentos em:
 - Expressões Regulares (Regex)
 - Tratamento de exceções
 - API de Data e Hora (java.time)
+- JDBC
+
 ## Funcionalidades
 
 ✔ Cadastro de pacientes
@@ -65,7 +67,7 @@ Este projeto foi criado para consolidar os conhecimentos em:
 
 ### Exceções
 
-- IllegalArgumentException
+- Exceção personalizadas
 - try/catch
 
 ### Arquivos
@@ -75,18 +77,26 @@ Este projeto foi criado para consolidar os conhecimentos em:
 ## Estrutura
 
 SistemaClinica
-
+├── Connection
 ├── domain
+│   ├── Paciente
+│   ├── Medico
+│   └── Consulta
+├── exception
+├── repository
+│   ├── Repository
+│   ├── RepositoryConsulta
+│   ├── RepositoryMedico
+│   └── RepositoryPacientes
+├── service
+│   ├── Clinica
+│   ├── ServiceConsulta
+│   ├── ServiceMedico
+│   └── ServicePaciente
+└── teste
+    └── ClinicaTeste
 
-│ ├── Paciente
-
-│ ├── Medico
-
-│ └── Consulta
-
-└── service
-
-└── Clinica
+    
 ## Regras do sistema
 
 - Não permite cadastrar dois pacientes com o mesmo CPF.
@@ -107,7 +117,7 @@ SistemaClinica
 - Java
 - Git
 - GitHub
-
+- Mysql
 ## Como executar
 
 1. Clone o projeto
@@ -132,10 +142,6 @@ Durante o desenvolvimento deste projeto pratiquei:
 ## Próximas melhorias
 
 - Interface gráfica (JavaFX)
-
-- Banco de dados (MySQL)
-
-- JDBC
 
 - Sistema de login
 
