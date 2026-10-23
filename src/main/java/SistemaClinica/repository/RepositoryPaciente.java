@@ -14,7 +14,7 @@ public class RepositoryPaciente {
 
         String sql = "INSERT INTO paciente (nome, cpf, telefone) VALUES (?, ?, ?)";
 
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, nome);
@@ -32,7 +32,7 @@ public class RepositoryPaciente {
 
         String sql = "DELETE FROM paciente WHERE cpf = ?";
 
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, cpf);

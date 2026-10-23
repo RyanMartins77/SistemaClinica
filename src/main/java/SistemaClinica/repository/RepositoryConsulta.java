@@ -5,26 +5,24 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Log4j2
 public class RepositoryConsulta {
-    public static void Adicionar(int id_consulta, String crm, LocalDate data_consulta, LocalTime horario, String Status, String cpf_pac)throws SQLException{
-        String sql = "INSERT INTO `clinica`.`consulta` (`id_consulta`, `crm`, `data_consulta`," +
+    public static void Adicionar( String crm, LocalDate data_consulta, LocalTime horario,  String cpf_pac)throws SQLException{
+        String sql = "INSERT INTO `clinica`.`consulta` ( `crm`, `data_consulta`," +
                 " `horario`, `status`, `cpf_paciente`) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, id_consulta);
-            ps.setString(2,crm );
-            ps.setObject(3, data_consulta);
-            ps.setObject(4, horario);
-            ps.setString(5,Status);
-            ps.setString(6,cpf_pac);
+
+            ps.setString(1,crm );
+            ps.setObject(2, data_consulta);
+            ps.setObject(3, horario);
+            ps.setString(4,cpf_pac);
             int i = ps.executeUpdate();
                 log.info("inserindo dados. database row effect '{}' ", i);
 
@@ -33,7 +31,7 @@ public class RepositoryConsulta {
     public static void delete(int id_consulta)throws SQLException {
         String sql = "DELETE FROM clinica.consulta WHERE id_consulta = ?";
 
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id_consulta);
@@ -54,7 +52,7 @@ public class RepositoryConsulta {
                 "SET data_consulta = ?, horario = ? " +
                 "WHERE id_consulta = ?";
 
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setObject(1, novaData);
@@ -68,4 +66,34 @@ public class RepositoryConsulta {
 
         }
     }
+    public static boolean existeConflitoMedico(
+            String crm, LocalDateTime horario) throws SQLException {
+
+        String sql = """
+        SELECT COUNT(*)
+        FROM consulta
+        WHERE crm = ?
+          AND data_consulta = ?
+          AND horario < ?
+          AND ADDTIME(horario, '00:30:00') > ?
+        """;
+
+        try (Connection conn = ConnectionClinica.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, crm);
+            ps.setDate(2, Date.valueOf(horario.toLocalDate()));
+            ps.setTime(3, Time.valueOf(horario.toLocalTime().plusMinutes(30)));
+            ps.setTime(4, Time.valueOf(horario.toLocalTime()));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }

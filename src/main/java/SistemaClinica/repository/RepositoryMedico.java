@@ -13,7 +13,7 @@ import java.time.LocalTime;
 public class RepositoryMedico {
     public static void Adicionar(String crm, String nome, String especialidade)throws SQLException{
         String sql = "INSERT INTO clinica.medico (crm, nome, especialidade) VALUES (?, ?, ?)";
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, crm );
             ps.setString(2,nome );
@@ -25,7 +25,7 @@ public class RepositoryMedico {
     }
     public static void delete(String crm)throws SQLException{
          String sql = "DELETE FROM clinica.medico WHERE crm = ?";;
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, crm );
             int i = ps.executeUpdate();
@@ -36,7 +36,7 @@ public class RepositoryMedico {
     public static void update(String crm, String novoNome) throws SQLException{
         String sql = "UPDATE clinica.medico SET nome = ? WHERE crm = ?";
 
-        try (Connection conn = ConnectionClinica.Conexao();
+        try (Connection conn = ConnectionClinica.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, novoNome);

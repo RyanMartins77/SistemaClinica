@@ -5,6 +5,7 @@ import SistemaClinica.domain.Medico;
 import SistemaClinica.domain.Paciente;
 import SistemaClinica.exception.ChaveJaExistenteException;
 import SistemaClinica.repository.Repository;
+import SistemaClinica.repository.RepositoryConsulta;
 import SistemaClinica.repository.RepositoryMedico;
 import SistemaClinica.repository.RepositoryPaciente;
 import lombok.extern.log4j.Log4j2;
@@ -35,27 +36,21 @@ public class Clinica {
                     p.getNome(),
                     p.getCpf(),
                     p.getTelefone());
-            pacientes.adicionar(p.getCpf(),p);
            log.info("Paciente cadastrado com sucesso!");
         } catch (SQLException e) {
             log.error("Erro ao cadastar usuario no Banco. ");
-        }catch (ChaveJaExistenteException e ){
-            log.info("Paciente ja existente");
         }
     }
 
     public void cadastrarMedico(Medico m){
         try{
             RepositoryMedico.Adicionar(m.getCrm(),m.getNome(),m.getEspecialidade());
-            medicos.adicionar(m.getCrm(),m);
            log.info("Medico cadastrado com sucesso");
         }catch (SQLException e){
             log.info("erro ao cadastrar medico ao banco");
-        } catch (ChaveJaExistenteException e ) {
-           log.info(e.getMessage());
         }
     }
-    public void agendarConsulta(String cpf , String crm, LocalDateTime horario){
+    public void agendarConsulta(String cpf , String crm, LocalDateTime horario) {
         try {
          Paciente p1 = buscarPaciente(cpf).orElseThrow(() -> new IllegalArgumentException("Paciente nao existe"));
          Medico m2 = buscarMedico(crm).orElseThrow(() -> new IllegalArgumentException("Medico nao existe"));
@@ -71,12 +66,13 @@ public class Clinica {
             throw new IllegalArgumentException("O paciente ja esta em consulta nesse horario.");
         }
 
-           Consulta c1 = new Consulta(p1,m2, horario);
-           consultas.add(c1);
-           listaConsultas();
-          log.info("consulta agendada com sucesso");
-       }catch (IllegalArgumentException e){
-          log.info(e.getMessage());
+            RepositoryConsulta.Adicionar(crm,horario.toLocalDate(), horario.toLocalTime(), cpf);
+            log.info("consulta agendada com sucesso");
+       }catch (SQLException e){
+            log.info("Erro ao consultar o banco de dados", e);
+        }
+        catch (IllegalArgumentException e){
+          log.warn(e.getMessage());
        }
 
     }
@@ -92,13 +88,11 @@ public class Clinica {
     public void listarConsulta(String cpf){
          consultas.stream().filter(c -> c.getPaciente().getCpf().equals(cpf)).forEach(c ->log.info(c));
     }
-
-
-    public Optional<Paciente> buscarPaciente(String cpf ){
-        return pacientes.buscar(cpf);
+    public Optional<Paciente> buscarPaciente(String cpf ) throws SQLException {
+        return pacientes.buscarPaciente(cpf);
     }
-    public Optional<Medico> buscarMedico(String crm){
-        return medicos.buscar(crm);
+    public Optional<Medico> buscarMedico(String crm) throws SQLException {
+        return medicos.buscarMedico(crm);
     }
     public boolean conflitoConsulta(String crm, LocalDateTime horario){
          return consultas.stream().anyMatch(c -> c.getDia_horario().equals(horario) && c.getMedico().equals(crm));
@@ -152,7 +146,7 @@ public class Clinica {
         try (FileWriter pacientes_s = new FileWriter("ListaPacientes.txt"); BufferedWriter
         pacientes1 = new BufferedWriter(pacientes_s)){
             for (Paciente paciente: pacientes.valores()){
-                pacientes1.write( paciente.getNome() + ";" + paciente.getCpf() +";" + paciente.getIdade() + ";" + paciente.getTelefone());
+                pacientes1.write( paciente.getNome() + ";" + paciente.getCpf() +";" +  ";" + paciente.getTelefone());
                 pacientes1.newLine();
             }
         }catch (IOException e){

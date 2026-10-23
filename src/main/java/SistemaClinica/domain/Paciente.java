@@ -3,10 +3,9 @@ package SistemaClinica.domain;
 public class Paciente {
     private String nome;
     private String cpf;
-    private int idade;
     private String telefone;
 
-    public Paciente(String nome, String cpf, int idade, String telefone) {
+    public Paciente(String nome, String cpf, String telefone) {
         if (!cpf.matches("^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}\\-\\d{2})$"))
             throw new IllegalArgumentException("cpf invalido");
         if (!nome.matches("^[A-Za-z]+( [A-Za-z]+)*$")){
@@ -14,7 +13,6 @@ public class Paciente {
         }
         this.nome = nome;
         this.cpf = cpf;
-        this.idade = idade;
         this.telefone = telefone;
     }
 
@@ -26,9 +24,6 @@ public class Paciente {
         return cpf;
     }
 
-    public int getIdade() {
-        return idade;
-    }
 
     public String getTelefone() {
         return telefone;
@@ -39,7 +34,6 @@ public class Paciente {
         return "Paciente{" +
                 "nome='" + nome + '\'' +
                 ", cpf='" + cpf + '\'' +
-                ", idade=" + idade +
                 ", telefone='" + telefone + '\'' +
                 '}';
     }

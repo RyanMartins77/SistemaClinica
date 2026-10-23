@@ -38,14 +38,10 @@ public class ClinicalTeste {
                         System.out.print("CPF: ");
                         String cpfPaciente = sc.nextLine();
 
-                        System.out.print("Idade: ");
-                        int idade = sc.nextInt();
-                        sc.nextLine();
-
                         System.out.print("Telefone: ");
                         String telefone = sc.nextLine();
 
-                        Paciente paciente = new Paciente(nomePaciente, cpfPaciente, idade, telefone);
+                        Paciente paciente = new Paciente(nomePaciente, cpfPaciente, telefone);
                         clinica.cadastrarPaciente(paciente);
                         break;
 
